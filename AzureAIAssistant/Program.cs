@@ -1,11 +1,12 @@
 using AzureAIAssistant.Data;
+using AzureAIAssistant.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=assistant.db"));
 // Add services to the container.
-
+builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
