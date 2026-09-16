@@ -1,0 +1,33 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Smart Assistant</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="app">
+        <header class="app-header">
+            <h1>Smart Assistant</h1>
+            <p class="subtitle">Ask me anything</p>
+        </header>
+
+        <main id="chatWindow" class="chat-window">
+            <div class="empty-state" id="emptyState">
+                Type a message below to start the conversation.
+            </div>
+        </main>
+
+        <form id="chatForm" class="chat-form">
+            <input type="text"
+                   id="userInput"
+                   placeholder="Type your message..."
+                   autocomplete="off"
+                   required />
+            <button type="submit" id="sendBtn">Send</button>
+        </form>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -3,14 +3,16 @@ using AzureAIAssistant.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=assistant.db"));
-// Add services to the container.
-builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite("Data Source=assistant.db"));
+// Add services to the container.
+builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddHttpClient<IAIService, AIService>();
+
 
 var app = builder.Build();
 
@@ -22,7 +24,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.UseAuthorization();
 
 app.MapControllers();

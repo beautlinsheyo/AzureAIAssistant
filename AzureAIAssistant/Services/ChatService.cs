@@ -1,5 +1,6 @@
 ﻿using AzureAIAssistant.Data;
 using AzureAIAssistant.Models;
+using AzureAIAssistant.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace AzureAIAssistant.Services
@@ -7,10 +8,12 @@ namespace AzureAIAssistant.Services
     public class ChatService : IChatService
     {
         private readonly AppDbContext _context;
+        private readonly IAIService _aiService;
 
-        public ChatService(AppDbContext context)
+        public ChatService(AppDbContext context, IAIService aiService)
         {
             _context = context;
+            _aiService = aiService;
         }
 
         public async Task<IEnumerable<ChatMessage>> GetAllMessagesAsync()
@@ -25,7 +28,8 @@ namespace AzureAIAssistant.Services
 
         public async Task<ChatMessage> CreateMessageAsync(ChatMessage message)
         {
-            message.AIResponse = "This is a placeholder response. Azure AI comes later!";
+            // Call the real AI instead of using placeholder text
+            message.AIResponse = await _aiService.GetAIResponseAsync(message.UserMessage);
             message.Timestamp = DateTime.UtcNow;
 
             _context.ChatMessages.Add(message);
