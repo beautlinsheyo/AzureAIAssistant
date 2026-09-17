@@ -6,7 +6,6 @@ namespace AzureAIAssistant.Services
         
             Task<IEnumerable<ChatMessage>> GetAllMessagesAsync();
             Task<ChatMessage?> GetMessageByIdAsync(int id);
-            Task<ChatMessage> CreateMessageAsync(ChatMessage message);
-        
+        Task<ChatMessage> CreateMessageAsync(string userMessage, List<ChatTurn> history);
     }
 }

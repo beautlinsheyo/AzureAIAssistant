@@ -32,9 +32,9 @@ namespace AzureAIAssistant.Controllers
             return Ok(message);
         }
         [HttpPost]
-        public async Task<ActionResult<ChatMessage>> Create(ChatMessage message)
+        public async Task<ActionResult<ChatMessage>> Create(ChatRequest request)
         {
-            var created = await _chatService.CreateMessageAsync(message);
+            var created = await _chatService.CreateMessageAsync(request.UserMessage, request.History);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
     }

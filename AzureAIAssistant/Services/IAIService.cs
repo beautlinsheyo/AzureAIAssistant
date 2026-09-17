@@ -1,7 +1,13 @@
 ﻿namespace AzureAIAssistant.Services
 {
-    public interface IAIService
+    public class ChatTurn
     {
-        Task<string> GetAIResponseAsync(string userMessage);
+        public string Role { get; set; } = string.Empty;    // "user" or "assistant"
+        public string Content { get; set; } = string.Empty;
     }
+        public interface IAIService
+        {
+            Task<string> GetAIResponseAsync(List<ChatTurn> conversation);
+        }
+    
 }

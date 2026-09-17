@@ -1,7 +1,7 @@
-﻿using AzureAIAssistant.Data;
+﻿using Microsoft.EntityFrameworkCore;
 using AzureAIAssistant.Models;
-using AzureAIAssistant.Services;
-using Microsoft.EntityFrameworkCore;
+using AzureAIAssistant.Data;
+
 
 namespace AzureAIAssistant.Services
 {
@@ -26,11 +26,20 @@ namespace AzureAIAssistant.Services
             return await _context.ChatMessages.FindAsync(id);
         }
 
-        public async Task<ChatMessage> CreateMessageAsync(ChatMessage message)
+        public async Task<ChatMessage> CreateMessageAsync(string userMessage, List<ChatTurn> history)
         {
-            // Call the real AI instead of using placeholder text
-            message.AIResponse = await _aiService.GetAIResponseAsync(message.UserMessage);
-            message.Timestamp = DateTime.UtcNow;
+            // Add the new user message to the conversation history
+            history.Add(new ChatTurn { Role = "user", Content = userMessage });
+
+            // Send the FULL conversation (with memory) to the AI
+            var aiReply = await _aiService.GetAIResponseAsync(history);
+
+            var message = new ChatMessage
+            {
+                UserMessage = userMessage,
+                AIResponse = aiReply,
+                Timestamp = DateTime.UtcNow
+            };
 
             _context.ChatMessages.Add(message);
             await _context.SaveChangesAsync();

@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
+
 namespace AzureAIAssistant.Services
 {
     public class AIService : IAIService
@@ -12,16 +13,24 @@ namespace AzureAIAssistant.Services
             _httpClient = httpClient;
             _configuration = configuration;
         }
-        public async Task<string> GetAIResponseAsync(string userMessage)
+
+        public async Task<string> GetAIResponseAsync(List<ChatTurn> conversation)
         {
             var endpoint = _configuration["AzureOpenAI:Endpoint"];
             var apiKey = _configuration["AzureOpenAI:ApiKey"];
             var deploymentName = _configuration["AzureOpenAI:DeploymentName"];
 
+            // Convert our ChatTurn list into the format Azure expects
+            var inputMessages = conversation.Select(turn => new
+            {
+                role = turn.Role,
+                content = turn.Content
+            });
+
             var requestBody = new
             {
                 model = deploymentName,
-                input = userMessage
+                input = inputMessages
             };
 
             var jsonContent = JsonSerializer.Serialize(requestBody);
@@ -31,6 +40,7 @@ namespace AzureAIAssistant.Services
             _httpClient.DefaultRequestHeaders.Add("api-key", apiKey);
 
             var response = await _httpClient.PostAsync(endpoint, content);
+
             if (!response.IsSuccessStatusCode)
             {
                 var errorBody = await response.Content.ReadAsStringAsync();
