@@ -4,8 +4,9 @@ const userInput = document.getElementById('userInput');
 const chatWindow = document.getElementById('chatWindow');
 const emptyState = document.getElementById('emptyState');
 const sendBtn = document.getElementById('sendBtn');
+const clearBtn = document.getElementById('clearBtn');
 
-let conversationHistory = []; // { role, content } pairs, in order
+let conversationHistory = [];
 
 chatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -19,7 +20,7 @@ chatForm.addEventListener('submit', async (e) => {
     userInput.value = '';
     sendBtn.disabled = true;
 
-    const loadingEl = addMessage('Thinking...', 'ai loading');
+    const loadingEl = addTypingIndicator();
 
     try {
         const response = await fetch('/api/Assistant', {
@@ -39,7 +40,6 @@ chatForm.addEventListener('submit', async (e) => {
         loadingEl.remove();
         addMessage(data.aiResponse, 'ai');
 
-        // Update local history AFTER a successful round-trip
         conversationHistory.push({ role: 'user', content: message });
         conversationHistory.push({ role: 'assistant', content: data.aiResponse });
 
@@ -53,11 +53,43 @@ chatForm.addEventListener('submit', async (e) => {
     }
 });
 
+clearBtn.addEventListener('click', () => {
+    conversationHistory = [];
+    chatWindow.innerHTML = '<div class="empty-state" id="emptyState">Type a message below to start the conversation.</div>';
+});
+
 function addMessage(text, cssClass) {
-    const div = document.createElement('div');
-    div.className = 'message ' + cssClass;
-    div.textContent = text;
-    chatWindow.appendChild(div);
+    const wrapper = document.createElement('div');
+    wrapper.className = 'message ' + cssClass;
+
+    const textEl = document.createElement('div');
+    textEl.textContent = text;
+    wrapper.appendChild(textEl);
+
+    const meta = document.createElement('div');
+    meta.className = 'message-meta';
+    meta.textContent = formatTime(new Date());
+    wrapper.appendChild(meta);
+
+    chatWindow.appendChild(wrapper);
     chatWindow.scrollTop = chatWindow.scrollHeight;
-    return div;
-} 
+    return wrapper;
+}
+
+function addTypingIndicator() {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'message ai';
+
+    const dots = document.createElement('div');
+    dots.className = 'typing-dots';
+    dots.innerHTML = '<span></span><span></span><span></span>';
+    wrapper.appendChild(dots);
+
+    chatWindow.appendChild(wrapper);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+    return wrapper;
+}
+
+function formatTime(date) {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
