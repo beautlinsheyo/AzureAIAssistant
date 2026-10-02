@@ -1,0 +1,15 @@
+# Build results
+bin/
+obj/
+
+# Database files (local data, shouldn't be in repo)
+*.db
+*.db-shm
+*.db-wal
+
+# User-specific files
+*.user
+.vs/
+
+# User Secrets (these live outside the project anyway, but just in case)
+secrets.json
