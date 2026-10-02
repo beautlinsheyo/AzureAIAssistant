@@ -12,7 +12,9 @@ chatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const message = userInput.value.trim();
-    if (!message) return;
+    if (!message) {
+        return; // Extra safety net; HTML 'required' already blocks this
+    }
 
     if (emptyState) emptyState.remove();
 
@@ -32,12 +34,23 @@ chatForm.addEventListener('submit', async (e) => {
             })
         });
 
+        loadingEl.remove();
+
+        if (response.status === 400) {
+            addMessage('Your message could not be sent. Please check it and try again.', 'ai');
+            return;
+        }
+
+        if (response.status === 503) {
+            addMessage('The assistant is temporarily unavailable. Please try again in a moment.', 'ai');
+            return;
+        }
+
         if (!response.ok) {
-            throw new Error('Request failed: ' + response.status);
+            throw new Error('Unexpected error: ' + response.status);
         }
 
         const data = await response.json();
-        loadingEl.remove();
         addMessage(data.aiResponse, 'ai');
 
         conversationHistory.push({ role: 'user', content: message });
@@ -45,7 +58,7 @@ chatForm.addEventListener('submit', async (e) => {
 
     } catch (err) {
         loadingEl.remove();
-        addMessage('Something went wrong. Please try again.', 'ai');
+        addMessage('Network error. Please check your connection and try again.', 'ai');
         console.error(err);
     } finally {
         sendBtn.disabled = false;

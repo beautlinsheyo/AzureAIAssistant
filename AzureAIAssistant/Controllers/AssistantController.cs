@@ -1,8 +1,6 @@
-﻿using AzureAIAssistant.Data;
+﻿using Microsoft.AspNetCore.Mvc;
 using AzureAIAssistant.Models;
 using AzureAIAssistant.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace AzureAIAssistant.Controllers
 {
@@ -11,10 +9,12 @@ namespace AzureAIAssistant.Controllers
     public class AssistantController : ControllerBase
     {
         private readonly IChatService _chatService;
+        private readonly ILogger<AssistantController> _logger;
 
-        public AssistantController(IChatService chatService)
+        public AssistantController(IChatService chatService, ILogger<AssistantController> logger)
         {
             _chatService = chatService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -31,11 +31,25 @@ namespace AzureAIAssistant.Controllers
             if (message == null) return NotFound();
             return Ok(message);
         }
+
         [HttpPost]
         public async Task<ActionResult<ChatMessage>> Create(ChatRequest request)
         {
-            var created = await _chatService.CreateMessageAsync(request.UserMessage, request.History);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var created = await _chatService.CreateMessageAsync(request.UserMessage, request.History);
+                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to process chat message.");
+                return StatusCode(503, new { error = "The assistant is temporarily unavailable. Please try again shortly." });
+            }
         }
     }
 }
